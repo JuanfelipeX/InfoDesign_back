@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const { Op } = require('sequelize');
 const ConsumoTramo = require('../models/consumoTramo.js');
 
 
@@ -87,6 +88,48 @@ router.delete('/:id', (req, res) => {
     })
     .catch((error) => {
       res.status(500).json({ error: 'Error al eliminar Consumo por Tramo' });
+    });
+});
+
+
+// Obtener las historias por tramo para un período de tiempo específico
+router.post('/historias', (req, res) => {
+  const fechaInicial = req.body.fechaInicial;
+  const fechaFinal = req.body.fechaFinal;
+
+  // Verificar si las fechas son válidas
+  if (!fechaInicial || !fechaFinal) {
+    res.status(400).json({ error: 'Falta la fecha inicial o final' });
+    return;
+  }
+
+  ConsumoTramo.findAll({
+    where: {
+      fecha: {
+        [Op.between]: [fechaInicial, fechaFinal] // Filtrar por el rango de fechas
+      }
+    },
+    attributes: ['linea', 'fecha', 'residencial', 'comercial', 'industrial'],
+  })
+    .then((consumoTramos) => {
+      const historias = consumoTramos.map((consumoTramo) => {
+        const consumo = consumoTramo.residencial + consumoTramo.comercial + consumoTramo.industrial;
+        const perdidas = consumo * 0.1; // Supongamos una tasa de pérdida del 10%
+        const costo = consumo * 0.15; // Supongamos un costo de consumo de $0.15 por unidad
+
+        return {
+          linea: consumoTramo.linea,
+          fecha: consumoTramo.fecha,
+          consumo,
+          perdidas,
+          costo,
+        };
+      });
+
+      res.json(historias);
+    })
+    .catch((error) => {
+      res.status(500).json({ error: 'Error al obtener las historias por tramo' });
     });
 });
 
