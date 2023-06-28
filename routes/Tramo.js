@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { Op } = require('sequelize');
-const Tramo = require('../models/Tramo.js');
+const Tramo = require('../models/tramo.js');
 
 
 // Obtener la lista completa de usuarios
@@ -103,7 +103,7 @@ router.post('/historias', (req, res) => {
     return;
   }
 
-  ConsumoTramo.findAll({
+  Tramo.findAll({
     where: {
       fecha: {
         [Op.between]: [fechaInicial, fechaFinal] // Filtrar por el rango de fechas
@@ -111,15 +111,15 @@ router.post('/historias', (req, res) => {
     },
     attributes: ['linea', 'fecha', 'residencial', 'comercial', 'industrial'],
   })
-    .then((consumoTramos) => {
-      const historias = consumoTramos.map((consumoTramo) => {
-        const consumo = consumoTramo.residencial + consumoTramo.comercial + consumoTramo.industrial;
-        const perdidas = consumo * 0.1; // Supongamos una tasa de pérdida del 10%
+    .then((tramos) => {
+      const historias = tramos.map((tramo) => {
+        const consumo = tramo.residencial + tramo.comercial + tramo.industrial;
+        const perdidas = tramo.residencial * 0.1 + tramo.comercial * 0.1 + tramo.industrial * 0.1; // Supongamos una tasa de pérdida del 10% para cada categoría
         const costo = consumo * 0.15; // Supongamos un costo de consumo de $0.15 por unidad
 
         return {
-          linea: consumoTramo.linea,
-          fecha: consumoTramo.fecha,
+          linea: tramo.linea,
+          fecha: tramo.fecha,
           consumo,
           perdidas,
           costo,
@@ -134,8 +134,8 @@ router.post('/historias', (req, res) => {
 });
 
 
-// Obtener el histórico de consumos por cliente (residencial, comercial, industrial) para un período de tiempo específico
-router.post('/historico-cliente', (req, res) => {
+// Obtener el histórico de consumos por cliente para un período de tiempo específico
+router.post('/historico-consumos', (req, res) => {
   const fechaInicial = req.body.fechaInicial;
   const fechaFinal = req.body.fechaFinal;
 
@@ -145,61 +145,119 @@ router.post('/historico-cliente', (req, res) => {
     return;
   }
 
-  ConsumoTramo.findAll({
+  Tramo.findAll({
     where: {
       fecha: {
         [Op.between]: [fechaInicial, fechaFinal] // Filtrar por el rango de fechas
       }
     },
-    attributes: ['linea', 'residencial', 'comercial', 'industrial'],
+    attributes: ['linea', 'fecha', 'residencial', 'comercial', 'industrial'],
   })
-    .then((consumoTramos) => {
-      const historicoCliente = {
-        residencial: { tramos: [], consumoTotal: 0, perdidasTotal: 0, costoTotal: 0 },
-        comercial: { tramos: [], consumoTotal: 0, perdidasTotal: 0, costoTotal: 0 },
-        industrial: { tramos: [], consumoTotal: 0, perdidasTotal: 0, costoTotal: 0 }
+    .then((tramos) => {
+      const historicoConsumos = {
+        residencial: {
+          tramo: '',
+          consumo: 0,
+          perdidas: 0,
+          costo: 0,
+        },
+        comercial: {
+          tramo: '',
+          consumo: 0,
+          perdidas: 0,
+          costo: 0,
+        },
+        industrial: {
+          tramo: '',
+          consumo: 0,
+          perdidas: 0,
+          costo: 0,
+        },
       };
 
-      consumoTramos.forEach((consumoTramo) => {
-        const consumo = consumoTramo.residencial + consumoTramo.comercial + consumoTramo.industrial;
-        const perdidas = consumo * 0.1; // Supongamos una tasa de pérdida del 10%
-        const costo = consumo * 0.15; // Supongamos un costo de consumo de $0.15 por unidad
+      tramos.forEach((tramo) => {
+        const consumoResidencial = tramo.residencial;
+        const consumoComercial = tramo.comercial;
+        const consumoIndustrial = tramo.industrial;
 
-        historicoCliente.residencial.tramos.push({
-          tramo: consumoTramo.linea,
-          consumo,
-          perdidas,
-          costo
-        });
-        historicoCliente.residencial.consumoTotal += consumo;
-        historicoCliente.residencial.perdidasTotal += perdidas;
-        historicoCliente.residencial.costoTotal += costo;
+        const perdidasResidencial = consumoResidencial * 0.1; // Supongamos una tasa de pérdida del 10% para residencial
+        const perdidasComercial = consumoComercial * 0.1; // Supongamos una tasa de pérdida del 10% para comercial
+        const perdidasIndustrial = consumoIndustrial * 0.1; // Supongamos una tasa de pérdida del 10% para industrial
 
-        historicoCliente.comercial.tramos.push({
-          tramo: consumoTramo.linea,
-          consumo,
-          perdidas,
-          costo
-        });
-        historicoCliente.comercial.consumoTotal += consumo;
-        historicoCliente.comercial.perdidasTotal += perdidas;
-        historicoCliente.comercial.costoTotal += costo;
+        const costoResidencial = consumoResidencial * 0.15; // Supongamos un costo de consumo de $0.15 por unidad para residencial
+        const costoComercial = consumoComercial * 0.15; // Supongamos un costo de consumo de $0.15 por unidad para comercial
+        const costoIndustrial = consumoIndustrial * 0.15; // Supongamos un costo de consumo de $0.15 por unidad para industrial
 
-        historicoCliente.industrial.tramos.push({
-          tramo: consumoTramo.linea,
-          consumo,
-          perdidas,
-          costo
-        });
-        historicoCliente.industrial.consumoTotal += consumo;
-        historicoCliente.industrial.perdidasTotal += perdidas;
-        historicoCliente.industrial.costoTotal += costo;
+        if (consumoResidencial > historicoConsumos.residencial.consumo) {
+          historicoConsumos.residencial.tramo = tramo.linea;
+          historicoConsumos.residencial.consumo = consumoResidencial;
+          historicoConsumos.residencial.perdidas = perdidasResidencial;
+          historicoConsumos.residencial.costo = costoResidencial;
+        }
+
+        if (consumoComercial > historicoConsumos.comercial.consumo) {
+          historicoConsumos.comercial.tramo = tramo.linea;
+          historicoConsumos.comercial.consumo = consumoComercial;
+          historicoConsumos.comercial.perdidas = perdidasComercial;
+          historicoConsumos.comercial.costo = costoComercial;
+        }
+
+        if (consumoIndustrial > historicoConsumos.industrial.consumo) {
+          historicoConsumos.industrial.tramo = tramo.linea;
+          historicoConsumos.industrial.consumo = consumoIndustrial;
+          historicoConsumos.industrial.perdidas = perdidasIndustrial;
+          historicoConsumos.industrial.costo = costoIndustrial;
+        }
       });
 
-      res.json(historicoCliente);
+      res.json(historicoConsumos);
     })
     .catch((error) => {
       res.status(500).json({ error: 'Error al obtener el histórico de consumos por cliente' });
+    });
+});
+
+
+// Obtener el top 20 de los peores tramos/cliente con mayores pérdidas
+router.post('/top-peores-tramos-cliente', (req, res) => {
+  const fechaInicial = req.body.fechaInicial;
+  const fechaFinal = req.body.fechaFinal;
+
+  // Verificar si las fechas son válidas
+  if (!fechaInicial || !fechaFinal) {
+    res.status(400).json({ error: 'Falta la fecha inicial o final' });
+    return;
+  }
+
+  Tramo.findAll({
+    where: {
+      fecha: {
+        [Op.between]: [fechaInicial, fechaFinal] // Filtrar por el rango de fechas
+      }
+    },
+    attributes: ['linea', 'fecha', 'residencial', 'comercial', 'industrial'],
+    order: [['residencial', 'DESC'], ['comercial', 'DESC'], ['industrial', 'DESC']],
+    limit: 20,
+  })
+    .then((tramos) => {
+      const peoresTramosCliente = tramos.map((tramo) => {
+        const perdidasResidencial = tramo.residencial * 0.1; // Supongamos una tasa de pérdida del 10% para residencial
+        const perdidasComercial = tramo.comercial * 0.1; // Supongamos una tasa de pérdida del 10% para comercial
+        const perdidasIndustrial = tramo.industrial * 0.1; // Supongamos una tasa de pérdida del 10% para industrial
+
+        return {
+          linea: tramo.linea,
+          fecha: tramo.fecha,
+          perdidasResidencial,
+          perdidasComercial,
+          perdidasIndustrial,
+        };
+      });
+
+      res.json(peoresTramosCliente);
+    })
+    .catch((error) => {
+      res.status(500).json({ error: 'Error al obtener el top 20 de los peores tramos/cliente' });
     });
 });
 
