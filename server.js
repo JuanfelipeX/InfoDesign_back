@@ -10,8 +10,10 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cors()); // Enable CORS for all routes
 
 const consumoTramoRouter = require('./routes/consumoTramo.js');
+const costoTramoRouter = require('./routes/costoTramo.js');
 
 app.use('/consumoTramo', consumoTramoRouter);
+app.use('/costoTramo', costoTramoRouter);
 
 // Rest of your code...
 
