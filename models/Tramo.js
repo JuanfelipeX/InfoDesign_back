@@ -4,7 +4,7 @@ const sequelize = new Sequelize('prueba_designinfo', 'postgres', '1234', {
   dialect: 'postgres',
 });
 
-const ConsumoTramo = sequelize.define('ConsumoTramo', {
+const Tramo = sequelize.define('Tramo', {
   linea: {
     type: DataTypes.STRING,
     allowNull: false,
@@ -14,22 +14,22 @@ const ConsumoTramo = sequelize.define('ConsumoTramo', {
     allowNull: false,
   },
   residencial: {
-    type: DataTypes.INTEGER,
+    type: DataTypes.DOUBLE,
   },
   comercial: {
-    type: DataTypes.INTEGER,
+    type: DataTypes.DOUBLE,
   },
   industrial: {
-    type: DataTypes.INTEGER,
+    type: DataTypes.DOUBLE,
   },
 });
 
-ConsumoTramo.sync()
+Tramo.sync()
   .then(() => {
-    console.log('Modelo de Consumo por Tramo sincronizado correctamente');
+    console.log('Modelo Tramo sincronizado correctamente');
   })
   .catch((error) => {
-    console.error('Error al sincronizar el modelo de Consumo por Tramo :', error);
+    console.error('Error al sincronizar el modelo de Tramo :', error);
   });
 
-module.exports = ConsumoTramo;
+module.exports = Tramo;

@@ -11,15 +11,12 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use(cors());
 
-const consumoTramoRouter = require('./routes/consumoTramo.js');
-const costoTramoRouter = require('./routes/costoTramo.js');
+const tramoRouter = require('./routes/Tramo.js');
 
-app.use('/consumoTramo', consumoTramoRouter);
-app.use('/costoTramo', costoTramoRouter);
-
+app.use('/tramo', tramoRouter);
 
 // Configura la ruta para obtener la lista de usuarios
-consumoTramoRouter.get('/', (req, res) => {
+tramoRouter.get('/', (req, res) => {
   // Lógica para obtener la lista de usuarios
   res.send('Obtener la lista de usuarios');
 });
