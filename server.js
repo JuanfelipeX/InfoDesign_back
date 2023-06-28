@@ -11,7 +11,7 @@ app.use(cors()); // Enable CORS for all routes
 
 const consumoTramoRouter = require('./routes/consumoTramo.js');
 
-app.use('/movie', consumoTramoRouter);
+app.use('/consumoTramo', consumoTramoRouter);
 
 // Rest of your code...
 

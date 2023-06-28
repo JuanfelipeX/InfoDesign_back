@@ -26,10 +26,10 @@ const ConsumoTramo = sequelize.define('ConsumoTramo', {
 
 ConsumoTramo.sync()
   .then(() => {
-    console.log('Modelo de Pelicula sincronizado correctamente');
+    console.log('Modelo de Consumo por Tramo sincronizado correctamente');
   })
   .catch((error) => {
-    console.error('Error al sincronizar el modelo de Peliculas:', error);
+    console.error('Error al sincronizar el modelo de Consumo por Tramo :', error);
   });
 
 module.exports = ConsumoTramo;

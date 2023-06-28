@@ -10,7 +10,7 @@ router.get('/', (req, res) => {
       res.json(consumoTramo);
     })
     .catch((error) => {
-      res.status(500).json({ error: 'Error al obtener la lista de las Peliculas' });
+      res.status(500).json({ error: 'Error al obtener la lista de Consumo por Tramo' });
     });
 });
 
@@ -23,7 +23,7 @@ router.post('/', (req, res) => {
       res.json(consumoTramo);
     })
     .catch((error) => {
-      res.status(500).json({ error: 'Error al crear una nueva Pelicula' });
+      res.status(500).json({ error: 'Error al crear un Nuevo Consumo por Tramo' });
     });
 });
 
@@ -37,11 +37,11 @@ router.get('/:id', (req, res) => {
       if (consumoTramo) {
         res.json(consumoTramo);
       } else {
-        res.status(404).json({ error: 'Pelicula no encontrada' });
+        res.status(404).json({ error: 'Consumo por Tramo no encontrado' });
       }
     })
     .catch((error) => {
-      res.status(500).json({ error: 'Error al obtener los detalles de la Pelicula' });
+      res.status(500).json({ error: 'Error al obtener los detalles de los Consumo por Tramo' });
     });
 });
 
@@ -59,14 +59,14 @@ router.put('/:id', (req, res) => {
         consumoTramo.publication_date = publication_date;
         return consumoTramo.save();
       } else {
-        res.status(404).json({ error: 'Pelicula no encontrado' });
+        res.status(404).json({ error: 'Consumo por Tramo no encontrado' });
       }
     })
     .then((updatedConsumoTramo) => {
       res.json(updatedConsumoTramo);
     })
     .catch((error) => {
-      res.status(500).json({ error: 'Error al actualizar los detalles de la Pelicula' });
+      res.status(500).json({ error: 'Error al actualizar los detalles de los Consumo por Tramo' });
     });
 });
 
@@ -79,14 +79,14 @@ router.delete('/:id', (req, res) => {
       if (consumoTramo) {
         return consumoTramo.destroy();
       } else {
-        res.status(404).json({ error: 'Pelicula no encontrado' });
+        res.status(404).json({ error: 'Consumo por Tramo no encontrado' });
       }
     })
     .then(() => {
-      res.json({ message: 'Pelicula eliminada correctamente' });
+      res.json({ message: 'Consumo por Tramo eliminada correctamente' });
     })
     .catch((error) => {
-      res.status(500).json({ error: 'Error al eliminar la pelicula' });
+      res.status(500).json({ error: 'Error al eliminar Consumo por Tramo' });
     });
 });
 
